@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private String direction;
     private refreshTimer refresher;
     private CountDownTimer counter;
+    private long currentTimeLeft = Long.MAX_VALUE;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +101,7 @@ public class MainActivity extends AppCompatActivity {
                 stop = stopID;
                 refresher.cancel();
                 Log.d(TAG, "cancelling refresher");
+                currentTimeLeft = Long.MAX_VALUE;
                 updateNextTrip();
                 Log.d(TAG, "restarting refresher");
                 refresher.start();
@@ -389,12 +391,17 @@ public class MainActivity extends AppCompatActivity {
                 //update UI
                 Collections.sort(depTimes);
                 int minutesLeft = depTimes.get(0);
+                if(minutesLeft < Math.ceil(currentTimeLeft / (1000 * 60))){
+                    //catch up
+                    currentTimeLeft = minutesLeft *1000*60;
+                }
                 if(counter != null) {
                     counter.cancel();
                 }
-                counter = new CountDownTimer(minutesLeft*1000*60, 1000) {
+                counter = new CountDownTimer(currentTimeLeft, 1000) {
 
                     public void onTick(long millisUntilFinished) {
+                        currentTimeLeft = millisUntilFinished;
                         ((TextView)findViewById(R.id.countdown)).setText(String.format("%02d", millisUntilFinished/(1000*60)) + ":" + String.format("%02d",(millisUntilFinished / 1000) % 60));
                     }
 
@@ -430,7 +437,7 @@ public class MainActivity extends AppCompatActivity {
         public void onFinish() {
             Log.d(TAG,"updating countdown...");
             updateNextTrip();
-            (new refreshTimer(repeat,tickInterval)).start();
+            refresher = new refreshTimer(repeat,tickInterval);
         }
     }
 }
