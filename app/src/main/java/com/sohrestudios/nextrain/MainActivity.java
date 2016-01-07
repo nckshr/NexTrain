@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
@@ -390,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 //update UI
                 Collections.sort(depTimes);
-                int minutesLeft = depTimes.get(0);
+                int minutesLeft = Math.max(0,depTimes.get(0));
                 if(minutesLeft < Math.ceil(currentTimeLeft / (1000 * 60))){
                     //catch up
                     currentTimeLeft = minutesLeft *1000*60;
@@ -406,6 +407,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     public void onFinish() {
+                        currentTimeLeft = Long.MAX_VALUE;
                         ((TextView)findViewById(R.id.countdown)).setText("DUE");
                     }
                 };
